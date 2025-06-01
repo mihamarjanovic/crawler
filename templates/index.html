@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ethereum Transactions Crawler</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-container { margin-bottom: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Ethereum Transactions Crawler</h1>
+    
+    <div class="form-container">
+        <form method="POST">
+            <label for="address">Wallet Address:</label>
+            <input type="text" id="address" name="address" value="{{ address }}" required>
+            <label for="start_block">Start Block:</label>
+            <input type="text" id="start_block" name="start_block" value="{{ start_block }}" required>
+            <label for="date">Balance Date (YYYY-MM-DD, optional):</label>
+            <input type="text" id="date" name="date" value="{{ date }}">
+            <button type="submit">Fetch Transactions</button>
+        </form>
+    </div>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    {% if balance is not none %}
+        <h2>ETH Balance on {{ date }}: {{ "%.8f" % balance }} ETH</h2>
+    {% endif %}
+
+    {% if transactions %}
+        <h2>ETH Transactions for {{ address }} (from block {{ start_block }})</h2>
+        <table>
+            <tr>
+                <th>From</th>
+                <th>To</th>
+                <th>ETH Amount</th>
+                <th>Gas Cost (ETH)</th>
+                <th>Time (UTC)</th>
+                <th>Block Number</th>
+            </tr>
+            {% for tx in transactions %}
+            <tr>
+                <td>{{ tx.from }}</td>
+                <td>{{ tx.to }}</td>
+                <td>{{ "%.8f" % tx.value }} ETH</td>
+                <td>{{ "%.8f" % tx.gasCost }} ETH</td>
+                <td>{{ tx.time }}</td>
+                <td>{{ tx.blockNumber }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    {% if token_transactions %}
+        <h2>Token Transactions for {{ address }} (from block {{ start_block }})</h2>
+        <table>
+            <tr>
+                <th>From</th>
+                <th>To</th>
+                <th>Token Amount</th>
+                <th>Token Symbol</th>
+                <th>Time (UTC)</th>
+                <th>Block Number</th>
+            </tr>
+            {% for tx in token_transactions %}
+            <tr>
+                <td>{{ tx.from }}</td>
+                <td>{{ tx.to }}</td>
+                <td>{{ "%.8f" % tx.value }} {{ tx.tokenSymbol }}</td>
+                <td>{{ tx.tokenSymbol }}</td>
+                <td>{{ tx.time }}</td>
+                <td>{{ tx.blockNumber }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</body>
+</html>
