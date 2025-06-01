@@ -20,17 +20,16 @@ def make_api_url(module, action, address, **kwargs):
 def is_valid_address(address):
     return bool(re.match(r'^0x[a-fA-F0-9]{40}$', address))
 
-def get_account_balance(address, block=None):
-    params = {"tag": "latest"} if block is None else {"blockno": block}
-    get_balance_url = make_api_url("account", "balance" if block is None else "balancehistory", address, **params)
+def get_account_balance(address):
+    url = make_api_url("account", "balance", address, tag="latest")
     try:
-        response = get(get_balance_url)
+        response = get(url)
         data = response.json()
         if data["status"] == "1":
             return float(data["result"]) / ETHER_VALUE
-        return None
-    except Exception as e:
-        return None
+    except Exception:
+        pass
+    return None
 
 def get_transactions(address, start_block):
     get_transactions_url = make_api_url(
@@ -100,13 +99,11 @@ def index():
     balance = None
     address = ""
     start_block = ""
-    date = ""
     error = ""
 
     if request.method == "POST":
         address = request.form.get("address", "").strip()
         start_block = request.form.get("start_block", "").strip()
-        date = request.form.get("date", "").strip()
 
         if not is_valid_address(address):
             error = "Invalid Ethereum address format."
@@ -115,17 +112,7 @@ def index():
         else:
             transactions = get_transactions(address, int(start_block))
             token_transactions = get_token_transactions(address, int(start_block))
-            
-            if date:
-                try:
-                    datetime.strptime(date, "%Y-%m-%d")
-                    block_number = get_block_by_date(date)
-                    if block_number:
-                        balance = get_account_balance(address, block_number)
-                        if balance is None:
-                            error = "Could not fetch balance for the given date."
-                except ValueError:
-                    error = "Invalid date format. Use YYYY-MM-DD."
+            balance = get_account_balance(address)
 
             if not transactions and not token_transactions and not error:
                 error = "No transactions found or API error occurred."
@@ -137,7 +124,7 @@ def index():
         balance=balance,
         address=address,
         start_block=start_block,
-        date=date,
+        date="",  # still passed, but unused
         error=error
     )
 

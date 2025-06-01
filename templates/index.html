@@ -20,8 +20,6 @@
             <input type="text" id="address" name="address" value="{{ address }}" required>
             <label for="start_block">Start Block:</label>
             <input type="text" id="start_block" name="start_block" value="{{ start_block }}" required>
-            <label for="date">Balance Date (YYYY-MM-DD, optional):</label>
-            <input type="text" id="date" name="date" value="{{ date }}">
             <button type="submit">Fetch Transactions</button>
         </form>
     </div>
@@ -31,7 +29,7 @@
     {% endif %}
 
     {% if balance is not none %}
-        <h2>ETH Balance on {{ date }}: {{ "%.8f" % balance }} ETH</h2>
+        <h2>Current ETH Balance: {{ "%.8f" % balance }} ETH</h2>
     {% endif %}
 
     {% if transactions %}
